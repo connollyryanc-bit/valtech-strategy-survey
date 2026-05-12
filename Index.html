@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Strategy Tool Survey · Valtech</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #F7F5F0; --surface: #FFFFFF; --text: #1A1814; --muted: #6B6862;
+      --accent: #2C5F4A; --accent-light: #E8F1ED; --border: #E0DDD6;
+      --radius: 12px;
+    }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 3rem 1.5rem 5rem; }
+    .page { max-width: 700px; margin: 0 auto; }
+
+    header { margin-bottom: 3rem; }
+    .eyebrow { font-size: 11px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin-bottom: 1rem; }
+    h1 { font-family: 'DM Serif Display', serif; font-size: clamp(2rem, 5vw, 3.2rem); line-height: 1.1; margin-bottom: 1rem; }
+    .divider { width: 48px; height: 2px; background: var(--accent); margin: 1.25rem 0; }
+    .subtitle { font-size: 15px; color: var(--muted); line-height: 1.65; font-weight: 300; }
+
+    .progress-wrap { background: var(--border); border-radius: 99px; height: 4px; margin-bottom: 3rem; overflow: hidden; }
+    .progress-bar { height: 100%; background: var(--accent); border-radius: 99px; width: 0%; transition: width 0.4s ease; }
+
+    .section-header { display: flex; align-items: center; gap: 1rem; margin: 2.5rem 0 1.25rem; }
+    .section-pill { font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); background: var(--accent-light); padding: 4px 10px; border-radius: 99px; white-space: nowrap; }
+    .section-title { font-size: 13px; font-weight: 500; color: var(--muted); letter-spacing: 0.03em; }
+    .section-line { flex: 1; height: 1px; background: var(--border); }
+
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.75rem 2rem; margin-bottom: 1rem; transition: border-color 0.15s; }
+    .card:focus-within { border-color: rgba(44,95,74,0.35); }
+
+    .q-meta { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; }
+    .q-num { font-size: 10px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); background: var(--accent-light); width: 24px; height: 24px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .q-tag { font-size: 10px; font-weight: 500; letter-spacing: 0.07em; text-transform: uppercase; border: 1px solid; padding: 2px 8px; border-radius: 99px; }
+    .q-tag.critical { color: #9B3A2A; border-color: #F5C4B3; background: #FAECE7; }
+    .q-tag.optional { color: #7A6A40; border-color: #E5D89A; background: #FDFBEE; }
+
+    .question-label { display: block; font-size: 16px; font-weight: 500; margin-bottom: 1.25rem; line-height: 1.45; cursor: default; }
+    .question-label .req { color: var(--accent); margin-left: 2px; }
+    .hint { font-size: 13px; color: var(--muted); margin-top: -0.75rem; margin-bottom: 1rem; font-weight: 300; }
+
+    input[type="text"], textarea, select {
+      width: 100%; font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--text);
+      background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+      padding: 0.75rem 1rem; outline: none; appearance: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    input[type="text"]:focus, textarea:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+    textarea { resize: vertical; min-height: 100px; }
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B6862' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 1rem center; padding-right: 2.5rem; cursor: pointer;
+    }
+
+    .radio-group, .checkbox-group { display: flex; flex-direction: column; gap: 0.5rem; }
+    .radio-option, .checkbox-option {
+      display: flex; align-items: center; gap: 0.75rem; padding: 0.7rem 1rem;
+      border: 1px solid var(--border); border-radius: 8px; cursor: pointer;
+      transition: background 0.1s, border-color 0.1s; user-select: none; font-size: 15px;
+    }
+    .radio-option:hover, .checkbox-option:hover { background: var(--bg); border-color: var(--accent); }
+    .radio-option input, .checkbox-option input { accent-color: var(--accent); width: 16px; height: 16px; flex-shrink: 0; cursor: pointer; }
+    .radio-option:has(input:checked), .checkbox-option:has(input:checked) { background: var(--accent-light); border-color: var(--accent); }
+
+    .other-reveal { display: none; margin-top: 0.5rem; padding-left: 2.25rem; }
+    .other-reveal input { font-size: 14px; padding: 0.5rem 0.75rem; }
+
+    .scale-group { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.4rem; }
+    .scale-btn {
+      border: 1px solid var(--border); border-radius: 8px; background: var(--bg);
+      font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500; color: var(--muted);
+      cursor: pointer; transition: all 0.12s; display: flex; align-items: center; justify-content: center; padding: 0.65rem 0;
+    }
+    .scale-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .scale-btn.selected { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .scale-labels { display: flex; justify-content: space-between; margin-top: 0.4rem; font-size: 12px; color: var(--muted); }
+
+    .conditional-block { display: none; margin-top: 1rem; padding: 1rem; background: var(--bg); border-radius: 8px; border: 1px solid var(--border); }
+    .conditional-block label { font-size: 14px; font-weight: 500; display: block; margin-bottom: 0.5rem; }
+    .conditional-block textarea { min-height: 80px; }
+
+    .submit-area { padding-top: 1.5rem; }
+    button[type="submit"] {
+      width: 100%; padding: 1rem 2rem; background: var(--accent); color: #fff;
+      border: none; border-radius: 8px; font-family: 'DM Sans', sans-serif;
+      font-size: 16px; font-weight: 500; cursor: pointer; letter-spacing: 0.01em;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+    button[type="submit"]:hover { opacity: 0.88; }
+    button[type="submit"]:active { transform: scale(0.99); }
+    button[type="submit"]:disabled { opacity: 0.6; cursor: not-allowed; }
+    .fine-print { text-align: center; font-size: 13px; color: var(--muted); margin-top: 1rem; }
+
+    .success-screen { display: none; text-align: center; padding: 5rem 2rem; }
+    .success-screen .checkmark { width: 64px; height: 64px; background: var(--accent-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; }
+    .success-screen h2 { font-family: 'DM Serif Display', serif; font-size: 2rem; margin-bottom: 0.75rem; }
+    .success-screen p { color: var(--muted); font-size: 16px; line-height: 1.6; }
+
+    @media (max-width: 480px) {
+      .card { padding: 1.25rem; }
+      .scale-btn { font-size: 13px; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <p class="eyebrow">Valtech · Strategy Tool</p>
+    <h1>Tool Feedback Survey</h1>
+    <div class="divider"></div>
+    <p class="subtitle">Help us understand how the strategy tool is working for you — what's clicking, what isn't, and what would make it indispensable. Around 5 minutes.</p>
+  </header>
+
+  <div class="progress-wrap"><div class="progress-bar" id="progress-bar"></div></div>
+
+  <!-- ✅ Replace mojrrdde with your actual Formspree endpoint ID -->
+  <form id="survey-form" action="https://formspree.io/f/mojrrdde" method="POST">
+
+    <!-- ─── SECTION 1 ─────────────────────────────────────── -->
+    <div class="section-header">
+      <span class="section-pill">Section 1</span>
+      <span class="section-title">Context &amp; Adoption</span>
+      <span class="section-line"></span>
+    </div>
+
+    <!-- Q1 -->
+    <div class="card">
+      <div class="q-meta"><span class="q-num">1</span></div>
+      <label class="question-label">What is your primary role when using the tool? <span class="req">*</span></label>
+      <div class="radio-group">
+        <label class="radio-option"><input type="radio" name="Role" value="Strategy / Consulting" required /> Strategy / Consulting</label>
+        <label class="radio-option"><input type="radio" name="Role" value="Client Partner / Commercial" /> Client Partner / Commercial</label>
+        <label class="radio-option"><input type="radio" name="Role" value="UX / CX / Experience" /> UX / CX / Experience</label>
+        <label class="radio-option"><input type="radio" name="Role" value="Data / AI" /> Data / AI</label>
+        <label class="radio-option"><input type="radio" name="Role" value="Transformation / Delivery" /> Transformation / Delivery</label>
+        <label class="radio-option"><input type="radio" name="Role" value="Other" /> Other</label>
+      </div>
+      <div class="other-reveal" id="role-other">
+        <input type="text" name="Role (Other)" placeholder="Please specify…" />
+      </div>
+    </div>
+
+    <!-- Q2 -->
+    <div class="card">
+      <div class="q-meta"><span class="q-num">2</span></div>
+      <label class="question-label">How often have you used the strategy tool so far? <span class="req">*</span></label>
+      <div class="radio-group">
+        <label class="radio-option"><input type="radio" name="Frequency of Use" value="Once" required /> Once</label>
+        <label class="radio-option"><input type="radio" name="Frequency of Use" value="2–3 times" /> 2–3 times</label>
+        <label class="radio-option"><input type="radio" name="Frequency of Use" value="Regularly (monthly)" /> Regularly (monthly)</label>
+        <label class="radio-option"><input type="radio" name="Frequency of Use" value="Frequently (weekly)" /> Frequently (weekly)</label>
+      </div>
+    </div>
+
+    <!-- Q3 -->
+    <div class="card">
+      <div class="q-meta"><span class="q-num">3</span></div>
+      <label class="question-label">In what context have you primarily used the tool?</label>
+      <p class="hint">Select all that apply</p>
+      <div class="checkbox-group">
+        <label class="checkbox-option"><input type="checkbox" name="Type of Usage" value="Pitch / pre-sales" /> Pitch / pre-sales</label>
+        <label class="checkbox-option"><input type="checkbox" name="Type of Usage" value="Client strategy development" /> Client strategy development</label>
+        <label class="checkbox-option"><input type="checkbox" name="Type of Usage" value="Internal thinking / framing" /> Internal thinking / framing</label>
+        <label class="checkbox-option"><input type="checkbox" name="Type of Usage" value="Workshop support" /> Workshop support</label>
+        <label class="checkbox-option"><input type="checkbox" name="Type of Usage" value="Deliverable creation" /> Deliverable creation</label>
+        <label class="checkbox-option" id="usage-other-opt"><input type="checkbox" name="Type of Usage" value="Other" /> Other</label>
+      </div>
+      <div class="other-reveal" id="usage-other">
+        <input type="text" name="Type of Usage (Other)" placeholder="Please specify…" />
+      </div>
+    </div>
+
+    <!-- ─── SECTION 2 ─────────────────────────────────────── -->
+    <div class="section-header">
+      <span class="section-pill">Section 2</span>
+      <span class="section-title">Usability &amp; Structure</span>
+      <span class="section-line"></span>
+    </div>
+
+    <!-- Q4 -->
+    <div class="card">
+      <div class="q-meta"><span class="q-num">4</span></div>
+      <label class="question-label">How easy is the tool to use end-to-end? <span class="req">*</span></label>
+      <input type="hidden" id="q4v" name="Ease of Use" />
+      <div class="scale-group" data-hidden="q4v">
+        <button type="button" class="scale-btn" data-val="1">1</button>
+        <button type="button" class="scale-btn" data-val="2">2</button>
+        <button type="button" class="scale-btn" data-val="3">3</button>
+        <button type="button" class="scale-btn" data-val="4">4</button>
+        <button type="button" class="scale-btn" data-val="5">5</button>
+      </div>
+      <div class="scale-labels"><span>Very difficult</span><span>Very easy</span></div>
+    </div>
+
+    <!-- Q5 -->
+    <div class="card">
+      <div class="q-meta"><span class="q-num">5</span></div>
+      <label class="question-label">How clear and intuitive are the strategy pillars? <span class="req">*</span></label>
+      <p class="hint">AI &amp; Data, Experience, Transformation, Commercial</p>
+      <input type="hidden" id="q5v" name="Clarity of Strategy Pillars" />
+      <div class="scale-group" data-hidden="q5v">
+        <button type="button" class="scale-btn" data-val="1">1</button>
+        <button type="button" class="scale-btn" data-val="2">2</button>
+        <button type="button" class="scale-btn" data-val="3">3</button>
+        <button type="button" class="scale-btn" data-val="4">4</button>
+        <button type="button" class="scale-btn" data-val="5">5</button>
+      </div>
+      <div class="scale-labels"><span>Confusing</span><span>Very clear</span></div>
+    </div>
+
+    <!-- Q6 -->
+    <div class="card">
+      <div class="q-meta"><span class="q-num">6</span></div>
+      <label class="question-label">How easy is it to move through the tool and understand what to do next? <span class="req">*</span></label>
+      <input type="hidden" id="q6v" name="Navigation and Flow" />
+      <div class="scale-group" data-hidden="q6v">
+        <button type="button" class="scale-btn" data-val="1">1</button>
+        <button type="button" class="scale-btn" data-val="2">2</button>
+        <button type="button" class="scale-btn" data-val="3">3</button>
+        <button type="button" class="scale-btn" data-val="4">4</button>
+        <button type="button" class="scale-btn" data-val="5">5</button>
+      </div>
+      <div class="scale-labels"><span>Very unclear</span><span>Very intuitive</span></div>
+    </div>
+
+    <!-- ─── SECTION 3 ─────────────────────────────────────── -->
+    <div class="section-header">
+      <span class="section-pill">Section 3</span>
+      <span class="section-title">Value &amp; Relevance</span>
+      <span class="section-line"></span>
+    </div>
+
+    <!-- Q7 -->
+    <div class="card">
+      <div class="q-meta"><span class="q-num">7</span></div>
+      <label class="question-label">How relevant is the tool to your day-to-day client work? <span class="req">*</span></label>
+      <input type="hidden" id="q7v" name="Relevance to Your Work" />
+      <div class="scale-group" data-hidden="q7v">
+        <button type="button" class="scale-btn" data-val="1">1</button>
+        <button type="button" class="scale-btn" data-val="2">2</button>
+        <button type="button" class="scale-btn" data-val="3">3</button>
+        <button type="button" class="scale-btn" data-val="4">4</button>
+        <button type="button" class="scale-btn" data-val="5">5</button>
+      </div>
+      <div class="scale-labels"><span>Not relevant</span><span>Highly relevant</span></div>
+    </div>
+
+    <!-- Q8 -->
+    <div class="card">
+      <div class="q-meta"><span class="q-num">8</span></div>
+      <label class="question-label">How useful are the outputs from the tool? <span class="req">*</span></label>
+      <p class="hint">e.g. strategy framing, recommendations, artefacts</p>
+      <input type="hidden" id="q8v" name="Quality of Output" />
+      <div class="scale-group" data-hidden="q8v">
+        <button type="button" class="scale-btn" data-val="1">1</button>
+        <button type="button" class="scale-btn" data-val="2">2</button>
+        <button type="button" class="scale-btn" data-val="3">3</button>
+        <button type="button" class="scale-btn" data-val="4">4</button>
+        <button type="button" class="scale-btn" data-val="5">5</button>
+      </div>
+      <div class="scale-labels"><span>Not useful</span><span>Highly actionable</span></div>
+    </div>
+
+    <!-- Q9 -->
+    <div class="card">
+      <div class="q-meta"><span class="q-num">9</span><span class="q-tag critical">Critical</span></div>
+      <label class="question-label">How confident are you using the tool's outputs in client-facing work? <span class="req">*</span></label>
+      <div class="radio-group">
+        <label class="radio-option"><input type="radio" name="Confidence in Output" value="Not confident" required /> Not confident</label>
+        <label class="radio-option"><input type="radio" name="Confidence in Output" value="Slightly confident" /> Slightly confident</label>
+        <label class="radio-option"><input type="radio" name="Confidence in Output" value="Moderately confident" /> Moderately confident</label>
+        <label class="radio-option"><input type="radio" name="Confidence in Output" value="Very confident" /> Very confident</label>
+      </div>
+    </div>
+
+    <!-- ─── SECTION 4 ─────────────────────────────────────── -->
+    <div class="section-header">
+      <span class="section-pill">Section 4</span>
+      <span class="section-title">Impact on Ways of Working</span>
+      <span class="section-line"></span>
+    </div>
+
+    <!-- Q10 -->
+    <div class="card">
+      <div class="q-meta"><span class="q-num">10</span></div>
+      <label class="question-label">Compared to how you previously developed strategy, this tool is: <span class="req">*</span></label>
+      <div class="radio-group">
+        <label class="radio-option"><input type="radio" name="Comparison to Previous Ways of Working" value="Much worse" required /> Much worse</label>
+        <label class="radio-option"><input type="radio" name="Comparison to Previous Ways of Working" value="Slightly worse" /> Slightly worse</label>
+        <label class="radio-option"><input type="radio" name="Comparison to Previous Ways of Working" value="About the same" /> About the same</label>
+        <label class="radio-option"><input type="radio" name="Comparison to Previous Ways of Working" value="Slightly better" /> Slightly better</label>
+        <label class="radio-option"><input type="radio" name="Comparison to Previous Ways of Working" value="Much better" /> Much better</label>
+      </div>
+    </div>
+
+    <!-- Q11 -->
+    <div class="card">
+      <div class="q-meta"><span class="q-num">11</span></div>
+      <label class="question-label">Has the tool improved the speed of developing strategy? <span class="req">*</span></label>
+      <div class="radio-group">
+        <label class="radio-option"><input type="radio" name="Impact on Speed" value="Significantly slower" required /> Significantly slower</label>
+        <label class="radio-option"><input type="radio" name="Impact on Speed" value="Slightly slower" /> Slightly slower</label>
+        <label class="radio-option"><input type="radio" name="Impact on Speed" value="No change" /> No change</label>
+        <label class="radio-option"><input type="radio" name="Impact on Speed" value="Slightly faster" /> Slightly faster</label>
+        <label class="radio-option"><input type="radio" name="Impact on Speed" value="Significantly faster" /> Significantly faster</label>
+      </div>
+    </div>
+
+    <!-- Q12 -->
+    <div class="card">
+      <div class="q-meta"><span class="q-num">12</span></div>
+      <label class="question-label">Has the tool improved the quality of your strategic thinking or deliverables? <span class="req">*</span></label>
+      <div class="radio-group">
+        <label class="radio-option"><input type="radio" name="Impact on Quality" value="Worse" required /> Worse</label>
+        <label class="radio-option"><input type="radio" name="Impact on Quality" value="No change" /> No change</label>
+        <label class="radio-option"><input type="radio" name="Impact on Quality" value="Slight improvement" /> Slight improvement</label>
+        <label class="radio-option"><input type="radio" name="Impact on Quality" value="Significant improvement" /> Significant improvement</label>
+      </div>
+    </div>
+
+    <!-- ─── SECTION 5 ─────────────────────────────────────── -->
+    <div class="section-header">
+      <span class="section-pill">Section 5</span>
+      <span class="section-title">Friction &amp; Gaps</span>
+      <span class="section-line"></span>
+    </div>
+
+    <!-- Q13 -->
+    <div class="card">
+      <div class="q-meta"><span class="q-num">13</span></div>
+      <label class="question-label">At what point in the process does the tool struggle most?</label>
+      <div class="radio-group">
+        <label class="radio-option"><input type="radio" name="Where It Breaks Down" value="Getting started / framing" /> Getting started / framing</label>
+        <label class="radio-option"><input type="radio" name="Where It Breaks Down" value="Navigating pillars" /> Navigating pillars</label>
+        <label class="radio-option"><input type="radio" name="Where It Breaks Down" value="Generating outputs" /> Generating outputs</label>
+        <label class="radio-option"><input type="radio" name="Where It Breaks Down" value="Customising for client context" /> Customising for client context</label>
+        <label class="radio-option"><input type="radio" name="Where It Breaks Down" value="Turning into deliverables" /> Turning into deliverables</label>
+        <label class="radio-option"><input type="radio" name="Where It Breaks Down" value="Other" /> Other</label>
+      </div>
+      <div class="other-reveal" id="breakdown-other">
+        <input type="text" name="Where It Breaks Down (Other)" placeholder="Please specify…" />
+      </div>
+    </div>
+
+    <!-- Q14 -->
+    <div class="card">
+      <div class="q-meta"><span class="q-num">14</span></div>
+      <label class="question-label">What is the biggest frustration or limitation when using the tool?</label>
+      <textarea name="Biggest Frustration" placeholder="Be as specific as you can — the more detail, the more useful…"></textarea>
+    </div>
+
+    <!-- Q15 -->
+    <div class="card">
+      <div class="q-meta"><span class="q-num">15</span></div>
+      <label class="question-label">What is the one thing that would make this tool indispensable for you?</label>
+      <textarea name="Missing Value or Opportunity" placeholder="Dream feature, workflow change, output format — anything goes…"></textarea>
+    </div>
+
+    <!-- ─── OPTIONAL ───────────────────────────────────────── -->
+    <div class="section-header">
+      <span class="section-pill">Optional</span>
+      <span class="section-title">Highly valuable — if you have a moment</span>
+      <span class="section-line"></span>
+    </div>
+
+    <!-- Q16 -->
+    <div class="card">
+      <div class="q-meta"><span class="q-num">16</span><span class="q-tag optional">Optional</span></div>
+      <label class="question-label">Would you recommend this tool to a colleague for real client work?</label>
+      <div class="radio-group">
+        <label class="radio-option"><input type="radio" name="Recommendation Signal" value="Yes" /> Yes</label>
+        <label class="radio-option"><input type="radio" name="Recommendation Signal" value="Maybe" /> Maybe</label>
+        <label class="radio-option"><input type="radio" name="Recommendation Signal" value="No" /> No</label>
+      </div>
+    </div>
+
+    <!-- Q17 -->
+    <div class="card">
+      <div class="q-meta"><span class="q-num">17</span><span class="q-tag optional">Optional</span></div>
+      <label class="question-label">Have you avoided using the tool when you could have?</label>
+      <div class="radio-group">
+        <label class="radio-option"><input type="radio" name="Avoidance Behaviour" value="Yes" /> Yes</label>
+        <label class="radio-option"><input type="radio" name="Avoidance Behaviour" value="No" /> No</label>
+      </div>
+      <div class="conditional-block" id="avoid-followup">
+        <label for="avoid-why">If yes, why?</label>
+        <textarea id="avoid-why" name="Avoidance Reason" placeholder="What made you reach for a different approach instead?…"></textarea>
+      </div>
+    </div>
+
+    <!-- Q18 -->
+    <div class="card">
+      <div class="q-meta"><span class="q-num">18</span><span class="q-tag optional">Optional</span></div>
+      <label class="question-label">What does this tool do better than your current ways of working?</label>
+      <textarea name="Differentiation" placeholder="Think about speed, consistency, quality of thinking, collaboration…"></textarea>
+    </div>
+
+    <!-- Q19 -->
+    <div class="card">
+      <div class="q-meta"><span class="q-num">19</span><span class="q-tag optional">Optional</span></div>
+      <label class="question-label">What would this tool need to replace your current approach to strategy entirely?</label>
+      <textarea name="Replacement Potential" placeholder="What's the gap between where it is and where it would need to be?…"></textarea>
+    </div>
+
+    <div class="submit-area">
+      <button type="submit" id="submit-btn">Submit Feedback →</button>
+      <p class="fine-print">Responses are sent directly to Ryan, Kristoffer, and Chris.</p>
+    </div>
+
+  </form>
+
+  <div class="success-screen" id="success-screen">
+    <div class="checkmark">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2C5F4A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <h2>Thank you.</h2>
+    <p>Your feedback has been recorded and sent to the team.<br>This is exactly what helps make the tool better.</p>
+  </div>
+
+</div><!-- /.page -->
+
+<script>
+  // Scale buttons
+  document.querySelectorAll('.scale-group[data-hidden]').forEach(group => {
+    const hidden = document.getElementById(group.dataset.hidden);
+    group.querySelectorAll('.scale-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        group.querySelectorAll('.scale-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        if (hidden) hidden.value = btn.dataset.val;
+        updateProgress();
+      });
+    });
+  });
+
+  // Radio "Other" reveals
+  function bindRadioOther(radioName, revealId) {
+    document.querySelectorAll(`input[name="${radioName}"]`).forEach(r => {
+      r.addEventListener('change', () => {
+        const show = [...document.querySelectorAll(`input[name="${radioName}"]`)]
+          .some(x => x.value === 'Other' && x.checked);
+        document.getElementById(revealId).style.display = show ? 'block' : 'none';
+        updateProgress();
+      });
+    });
+  }
+  bindRadioOther('Role', 'role-other');
+  bindRadioOther('Where It Breaks Down', 'breakdown-other');
+
+  // Checkbox "Other" reveal
+  document.querySelector('#usage-other-opt input').addEventListener('change', function() {
+    document.getElementById('usage-other').style.display = this.checked ? 'block' : 'none';
+  });
+
+  // Avoidance conditional
+  document.querySelectorAll('input[name="Avoidance Behaviour"]').forEach(r => {
+    r.addEventListener('change', () => {
+      document.getElementById('avoid-followup').style.display =
+        r.value === 'Yes' && r.checked ? 'block' : 'none';
+    });
+  });
+
+  // Progress bar
+  const SCALE_IDS = ['q4v','q5v','q6v','q7v','q8v'];
+  const RADIO_NAMES = ['Role','Frequency of Use','Confidence in Output',
+    'Comparison to Previous Ways of Working','Impact on Speed','Impact on Quality'];
+  const TOTAL = SCALE_IDS.length + RADIO_NAMES.length;
+
+  function updateProgress() {
+    const scaleDone = SCALE_IDS.filter(id => document.getElementById(id)?.value).length;
+    const radioDone = RADIO_NAMES.filter(n =>
+      document.querySelector(`input[name="${n}"]:checked`)
+    ).length;
+    const pct = Math.round(((scaleDone + radioDone) / TOTAL) * 100);
+    document.getElementById('progress-bar').style.width = Math.min(pct, 100) + '%';
+  }
+
+  document.querySelectorAll('input[type="radio"]').forEach(r => {
+    r.addEventListener('change', updateProgress);
+  });
+
+  // Submission
+  document.getElementById('survey-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn = document.getElementById('submit-btn');
+    btn.textContent = 'Sending…'; btn.disabled = true;
+    try {
+      const res = await fetch(e.target.action, {
+        method: 'POST', body: new FormData(e.target),
+        headers: { 'Accept': 'application/json' }
+      });
+      if (res.ok) {
+        document.getElementById('survey-form').style.display = 'none';
+        document.getElementById('success-screen').style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        btn.textContent = 'Submit Feedback →'; btn.disabled = false;
+        alert('Something went wrong — please try again.');
+      }
+    } catch {
+      btn.textContent = 'Submit Feedback →'; btn.disabled = false;
+      alert('Network error. Please check your connection and try again.');
+    }
+  });
+</script>
+</body>
+</html>
